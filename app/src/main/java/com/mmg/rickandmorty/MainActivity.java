@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Adapter adapter;
     private final String api = "https://rickandmortyapi.com/api/character";
     private final String searchCharacterApi = "https://rickandmortyapi.com/api/character/?name=";
+    private Dialog dialog;
 
 
     @Override
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
 
+        dialog = new Dialog(this);
         charactersList.clear();
         buildRecyclerView();
 
@@ -84,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void getAllCharacters(String apiURL){
 
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+      //  dialog.show();
         //charactersList.clear();
         String characterURL = api + "?page=1";
         // characterURL = https://rickandmortyapi.com/api/character?page=1
@@ -127,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("girdi","girdi");
                         Log.e("next2",next);
                         getAllCharacters(info.getString("next"));
+                    }
+                    else {
+                      //  dialog.dismiss();
                     }
 
 
