@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private final String api = "https://rickandmortyapi.com/api/character";
     private final String searchCharacterApi = "https://rickandmortyapi.com/api/character/?name=";
     private Dialog dialog;
-
+    String oldNext=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +54,16 @@ public class MainActivity extends AppCompatActivity {
         buildRecyclerView();
 
         getAllCharacters(api);
+        Log.e("burda ", "burda");
 
         mainBinding.textViewCancel.setOnClickListener(view -> {
             mainBinding.editTextSearchCharacter.getText().clear();
+            mainBinding.imageViewNotFound.setVisibility(View.INVISIBLE);
             hideKeyboard(this);
         });
         mainBinding.imageViewCancel.setOnClickListener(view -> {
             mainBinding.editTextSearchCharacter.getText().clear();
+            mainBinding.imageViewNotFound.setVisibility(View.INVISIBLE);
         });
         mainBinding.editTextSearchCharacter.addTextChangedListener(new TextWatcher() {
             @Override
@@ -85,22 +88,15 @@ public class MainActivity extends AppCompatActivity {
     private void buildRecyclerView(){
         mainBinding.recyclerViewCharacters.setHasFixedSize(true);
         mainBinding.recyclerViewCharacters.setLayoutManager(new GridLayoutManager(this, 2, RecyclerView.VERTICAL, false));
+        adapter = null;
     }
 
     public void getAllCharacters(String apiURL){
-
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-      //  dialog.show();
-        //charactersList.clear();
-        String characterURL = api + "?page=1";
-        // characterURL = https://rickandmortyapi.com/api/character?page=1
-        //Log.e("URL", apiURL);
+        mainBinding.imageViewNotFound.setVisibility(View.INVISIBLE);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, apiURL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 
-//                Log.e("response", response);
 
                 try {
 
@@ -108,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject info = jsonObject.getJSONObject("info");
                     String next = info.getString("next");
                     int pages = info.getInt("pages");
-                    Log.e("next",next);
 
                     JSONArray jsonArrayResults = jsonObject.getJSONArray("results");
 
@@ -127,17 +122,15 @@ public class MainActivity extends AppCompatActivity {
                         charactersList.add(c);
                         adapter = new Adapter(MainActivity.this, charactersList);
                         mainBinding.recyclerViewCharacters.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
 
                     }
-                    Log.e("pages",String.valueOf(pages));
 
                     if (!next.equals("null")){
-                        Log.e("girdi","girdi");
-                        Log.e("next2",next);
                         getAllCharacters(info.getString("next"));
                     }
                     else {
-                      //  dialog.dismiss();
+
                     }
 
 
@@ -159,34 +152,32 @@ public class MainActivity extends AppCompatActivity {
 
     public void searchCharacter(String text){
 
-        String searchCharacterURL = null;
-        if (text.contains("https")){
-            searchCharacterURL = text;
-        }
-        else{
-            searchCharacterURL = searchCharacterApi + text;
-        }
-        // searchMovieURL = https://api.themoviedb.org/3/search/movie?api_key=4186844cb1e227ca51b707e60d7238fe&query=doctor
+        String searchCharacterURL = searchCharacterApi + text;
+        Log.e("searchCharacterURL",searchCharacterURL);
 
         if (mainBinding.editTextSearchCharacter.getText().toString().equals("")){
-            charactersList.clear();
-            getAllCharacters(api);
+            if (!charactersList.isEmpty()){
+                adapter = new Adapter(MainActivity.this, charactersList);
+                mainBinding.recyclerViewCharacters.setAdapter(adapter);
+            }
+            else {
+                charactersList.clear();
+                getAllCharacters(api);
+            }
         }
         else {
-            // charactersListForSearch.clear();
+            charactersListForSearch.clear();
+
             StringRequest stringRequest = new StringRequest(Request.Method.GET, searchCharacterURL, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
 
-                    Log.e("response", response);
-
                     try {
-
+                        mainBinding.imageViewNotFound.setVisibility(View.INVISIBLE);
                         JSONObject jsonObject = new JSONObject(response);
                         JSONObject info = jsonObject.getJSONObject("info");
                         String next = info.getString("next");
                         int pages = info.getInt("pages");
-                        Log.e("next",next);
 
                         JSONArray jsonArrayResults = jsonObject.getJSONArray("results");
 
@@ -207,22 +198,26 @@ public class MainActivity extends AppCompatActivity {
                             mainBinding.recyclerViewCharacters.setAdapter(adapter);
 
                         }
-                        Log.e("pages",String.valueOf(pages));
-
-                        if (!next.equals("null")){
-                            searchCharacter(next);
-                        }
 
                     } catch (JSONException e ) {
-                        e.printStackTrace();
+
                     }
 
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e("error: ", error.toString());
-                    error.printStackTrace();
+                    //adapter = new Adapter(MainActivity.this, charactersListForSearch);
+                    //mainBinding.recyclerViewCharacters.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    mainBinding.imageViewNotFound.setVisibility(View.VISIBLE);
+                   /* Log.e("error: ", error.toString());
+                    Log.e("burdaaa: ", error.toString());
+                    adapter = new Adapter(MainActivity.this, charactersListForSearch);
+                    mainBinding.recyclerViewCharacters.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    mainBinding.imageViewNotFound.setVisibility(View.VISIBLE);
+                    error.printStackTrace();*/
                 }
             });
 
