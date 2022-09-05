@@ -16,9 +16,9 @@
  <br />
 <table>
   <tr>
-    <td><img src="screen_shots/splash1.png" alt="splash_screen" width="200" height="425"></td>
-    <td><img src="screen_shots/splash2.png" width="200" height="425"></td>
-    <td><img src="screen_shots/splash3.png" width="200" height="425"></td>
+    <td><img src="screen_shots/3.jpeg" alt="splash_screen" width="200" height="425"></td>
+    <td><img src="screen_shots/2.jpeg" width="200" height="425"></td>
+    <td><img src="screen_shots/1.jpeg" width="200" height="425"></td>
   </tr>
  </table>
  <br />
