@@ -1,5 +1,6 @@
 package com.mmg.rickandmorty;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,9 +15,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -40,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private final String api = "https://rickandmortyapi.com/api/character";
     private final String searchCharacterApi = "https://rickandmortyapi.com/api/character/?name=";
     private Dialog dialog;
-    String oldNext=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         buildRecyclerView();
 
         getAllCharacters(api);
+        startLoadingdialog();
         Log.e("burda ", "burda");
 
         mainBinding.textViewCancel.setOnClickListener(view -> {
@@ -92,18 +96,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getAllCharacters(String apiURL){
+
         mainBinding.imageViewNotFound.setVisibility(View.INVISIBLE);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, apiURL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 
-
                 try {
+
 
                     JSONObject jsonObject = new JSONObject(response);
                     JSONObject info = jsonObject.getJSONObject("info");
                     String next = info.getString("next");
                     int pages = info.getInt("pages");
+                    Log.e("next",next);
 
                     JSONArray jsonArrayResults = jsonObject.getJSONArray("results");
 
@@ -130,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                         getAllCharacters(info.getString("next"));
                     }
                     else {
-
+                        dismissdialog();
                     }
 
 
@@ -142,7 +148,10 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
+                if (error instanceof NoConnectionError) {
+                    Toast.makeText(getApplicationContext(),"Please Check Internet Connection", Toast.LENGTH_SHORT).show();
+                    dismissdialog();
+                }
             }
         });
 
@@ -207,23 +216,34 @@ public class MainActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    //adapter = new Adapter(MainActivity.this, charactersListForSearch);
-                    //mainBinding.recyclerViewCharacters.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                     mainBinding.imageViewNotFound.setVisibility(View.VISIBLE);
-                   /* Log.e("error: ", error.toString());
-                    Log.e("burdaaa: ", error.toString());
-                    adapter = new Adapter(MainActivity.this, charactersListForSearch);
-                    mainBinding.recyclerViewCharacters.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                    mainBinding.imageViewNotFound.setVisibility(View.VISIBLE);
-                    error.printStackTrace();*/
                 }
             });
 
             Volley.newRequestQueue(getApplicationContext()).add(stringRequest);
         }
     }
+
+    void startLoadingdialog() {
+
+        // adding ALERT Dialog builder object and passing activity as parameter
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // layoutinflater object and use activity to get layout inflater
+        LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.loading, null));
+        builder.setCancelable(false);
+
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    // dismiss method
+    void dismissdialog() {
+        dialog.dismiss();
+    }
+
 
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
