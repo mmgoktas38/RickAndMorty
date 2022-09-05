@@ -2,6 +2,7 @@ package com.mmg.rickandmorty;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
         getAllCharacters(api);
         startLoadingdialog();
-        Log.e("burda ", "burda");
 
         mainBinding.textViewCancel.setOnClickListener(view -> {
             mainBinding.editTextSearchCharacter.getText().clear();
@@ -109,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject info = jsonObject.getJSONObject("info");
                     String next = info.getString("next");
                     int pages = info.getInt("pages");
-                    Log.e("next",next);
 
                     JSONArray jsonArrayResults = jsonObject.getJSONArray("results");
 
@@ -162,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
     public void searchCharacter(String text){
 
         String searchCharacterURL = searchCharacterApi + text;
-        Log.e("searchCharacterURL",searchCharacterURL);
 
         if (mainBinding.editTextSearchCharacter.getText().toString().equals("")){
             if (!charactersList.isEmpty()){
